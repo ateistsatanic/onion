@@ -126,7 +126,42 @@ async def name(client, message):
        await message.edit('новое имя установлено')
 
 
+async def cheker(user_id, chat_id):
+    with open('responder.txt', 'r', encoding='utf-8') as f:
+        f = f.read().split('\n')
+        if f'{user_id}:{chat_id}' in f:
+            return True
+        else:
+            return False
 
+@app.on_message(filters.command("respond", prefixes="."))
+async def responder(client, message):
+    me = await app.get_me()
+    username = me.username
+    if message.from_user.id == me.id:
+        args = message.text.split(' ')
+        
+        # Используем множества для автоматического удаления дубликатов
+        chats = set()
+        users = set()
+        
+        for arg in args[1:]:
+            if arg.startswith('-'):
+                # Переключаем состояние: если есть - удаляем, если нет - добавляем
+                if arg in chats:
+                    chats.remove(arg)
+                    await message.edit('Удалили чат в список')
+                else:
+                    chats.add(arg)
+                    await message.edit('Добавили чат в список')
+            else:
+                if arg in users:
+                    users.remove(arg)
+                    await message.edit('Удалили человека из списока')
+                else:
+                    users.add(arg)
+                    await message.edit('Добавили человека в список')
+        
 
 
 
@@ -237,7 +272,38 @@ async def stoper(Client, message):
            user = await app.get_me()
            user = user.username
            await send_telegram_message(f'@{user} {e}')
-
+   
+@app.on_message()
+async def responder_chek(client, message):
+     sh = ' '.join(shapka[0:])
+     try:
+        if message.text:
+           text = message.text.lower()
+           chat_id = message.chat.id
+           
+           if message.from_user:
+               user_id = message.from_user.id
+               content = open('phrases/messages.txt', 'r', encoding='utf-8').read().split('\n')
+               if str(user_id) in users:
+                   await sleep(int(delay[0]))
+                   await message.reply(f'{sh} {random.choice(content)}')
+               else:
+                   if str(message.chat.id) in chats:
+                       await sleep(int(delay[0]))
+                       await message.reply(f'{sh} {random.choice(content)}')
+                   else:
+                       with open('responder.txt', 'r', encoding='utf-8') as f:
+                           f = f.read().split('\n')
+                           if f'{message.from_user.id}:{message.chat.id}' in f:
+                               await sleep(int(delay[0]))
+                               await message.reply(f'{sh} {random.choice(content)}')
+                           else:
+                               pass
+     except Exception as e:
+        user = await app.get_me()
+        user = user.username
+        await send_telegram_message(f'@{user} {e}')
+        print(f'>>>>>> {e}')
 
 
 
